@@ -249,14 +249,12 @@ public class TOTP {
 
     return false;
   }
-
-  public static String randomId() {
-
-    return randomId(20);
-  }
-
+public static String randomId(){
+  return randomId(20);
+}
   public static String randomId(int secretSize) {
 
+    
     int numOfScratchCodes = 0;
     int scratchCodeSie = 0;
     // Allocating the buffer
