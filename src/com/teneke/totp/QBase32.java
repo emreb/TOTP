@@ -25,7 +25,7 @@ public class QBase32 {
                                                      // '}', '~', 'DEL'
       };
 
-  static public String encode(final byte[] bytes) {
+  static public byte[] encode(final byte[] bytes) {
 
     int i = 0, index = 0, digit = 0;
     int currByte, nextByte;
@@ -99,7 +99,7 @@ public class QBase32 {
     }
     // end fix
 
-    return base32.toString();
+    return base32.toString().getBytes();
   }
 
   static public String decode(final String base32) {

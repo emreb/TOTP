@@ -7,7 +7,9 @@ import java.security.GeneralSecurityException;
 import java.security.NoSuchAlgorithmException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.Random;
 import java.util.TimeZone;
 
 import javax.crypto.Mac;
@@ -211,7 +213,7 @@ public class TOTP {
 
   public static boolean verify(String key, String value) {
 
-    return verify(key, value, 2);
+    return verify(key, value, 1);
   }
 
   public static boolean verify(String key, String value, int offset) {
@@ -224,9 +226,9 @@ public class TOTP {
     long[] timeStamps = new long[(2 * offset) + 1];
 
     timeStamps[0] = (System.currentTimeMillis() / 1000);
-    for (int i = 1; i < offset; i++) {
-      timeStamps[i * 2] = (System.currentTimeMillis() / 1000) - (X * i);
-      timeStamps[i * 2 + 1] = (System.currentTimeMillis() / 1000) + (X * i);
+    for (int i = 1; i <= offset; i++) {
+      timeStamps[i * 2 - 1] = (System.currentTimeMillis() / 1000) - (X * i);
+      timeStamps[i * 2] = (System.currentTimeMillis() / 1000) + (X * i);
     }
 
     String steps = "0";
@@ -248,13 +250,44 @@ public class TOTP {
     return false;
   }
 
-  public static void main(String[] args) {
+  public static String randomId() {
 
-    // https://www.google.com/chart?chs=200x200&chld=M|0&cht=qr&chl=otpauth://totp/test@test%3Fsecret%3DASDFJASDFH2432
-    System.out.println(verify("ASDFJASDFH2432", "301062"));
+    return randomId(20);
   }
 
-  public static void mainOldOther(String[] args)
+  public static String randomId(int secretSize) {
+
+    int numOfScratchCodes = 0;
+    int scratchCodeSie = 0;
+    // Allocating the buffer
+    byte[] buffer = new byte[secretSize + numOfScratchCodes * scratchCodeSie];
+
+    // Filling the buffer with random numbers.
+    // Notice: you want to reuse the same random generator
+    // while generating larger random number sequences.
+    new Random().nextBytes(buffer);
+
+    byte[] secretKey = Arrays.copyOf(buffer, secretSize);
+    byte[] bEncodedKey = QBase32.encode(secretKey);
+    String encodedKey = new String(bEncodedKey);
+    return encodedKey;
+  }
+
+  public static String getQRCodeURL(String app, String email, String secret) {
+
+    return "https://www.google.com/chart?chs=200x200&chld=M|0&cht"
+        + "=qr&chl=otpauth://totp/" + app + ":" + email + "%3Fsecret%3D"
+        + secret;
+  }
+
+  public static void main(String[] args) {
+
+    System.out.println(getQRCodeURL("test", "emre@qubit", randomId()));
+    // https://www.google.com/chart?chs=200x200&chld=M|0&cht=qr&chl=otpauth://totp/test@test%3Fsecret%3DASDFJASDFH2432
+    System.out.println(verify("ASDFJASDFH2432", "691551"));
+  }
+
+  public static void main1(String[] args)
       throws NoSuchAlgorithmException,
       UnsupportedEncodingException {
 
